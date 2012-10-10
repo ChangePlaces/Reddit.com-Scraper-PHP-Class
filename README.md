@@ -18,7 +18,7 @@ $data = $reddit->scrape($section,$max_pages);
 
 foreach($data as $item) {
 	// if the link is an imgur link, download the images
-	if(strstr($item['url'],'imgur.com')) { ```
+	if(strstr($item['url'],'imgur.com')) {
 		$reddit->processImgurLink($item['url'],'images/',$item['author']);
 	}
 }
