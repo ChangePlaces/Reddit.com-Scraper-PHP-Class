@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 /*
 	Reddit.com Scraper PHP Class
 	Author: Brandon DuBois
@@ -38,11 +39,11 @@ class Reddit {
 		processes imgur urls and downloads pictures to specified directory
 	*/
 	function processImgurLink($url,$savedir,$username = '') {
-		if($username<>'') { $username.='_'; }
 		if(strstr($url,'i.imgur')) {
 			// this is a single picture, grab the location
 			$imgname = explode('/',$url); $imgname = end($imgname);
-			$img = $savedir.$username.$this->cleanFileName($imgname);
+			mkdir($savedir.'/'.$username);
+			$img = $savedir.'/'.$username.'/'.$this->cleanFileName($imgname);
 			// save the image locally
 			if(file_put_contents($img,file_get_contents($url))) {
 				return true;
@@ -54,7 +55,8 @@ class Reddit {
 			$urls = $this->getImgurAlbum($url);
 			foreach($urls as $url) {
 				$imgname = explode('/',$url); $imgname = end($imgname);
-				$img = $savedir.$username.$this->cleanFileName($imgname);
+				mkdir($savedir.'/'.$username);
+				$img = $savedir.'/'.$username.'/'.$this->cleanFileName($imgname);
 				// save the image locally
 				if(file_put_contents($img,file_get_contents($url))) {
 					return true;
@@ -65,9 +67,13 @@ class Reddit {
 			// this is a single picture
 			$imgname = explode('/',$url); $imgname = end($imgname);
 			$url = 'http://imgur.com/download/'.$imgname;
-			$img = $savedir.$username.$imgname.'.jpg';
+			mkdir($savedir.'/'.$username);
+			$img = $savedir.'/'.$username.'/'.$imgname.'.jpg';
 			//save the image locally
 			if(file_put_contents($img,file_get_contents($url))) {
+				if($this->isFilePNG($img)) {
+					$this->png2jpg($img,str_replace('.jpg','.jpeg',$img),100);
+				}
 				return true;
 			}
 			return false;
@@ -93,6 +99,37 @@ class Reddit {
 		$name = substr($name,0,9);
 		return $name;
 	}	
+	
+	/*
+		function isFilePNG
+		returns true or false whether file has png headers
+	*/
+	function isFilePNG($filename) {
+		if (!file_exists($filename)) {
+			return false;
+		}
+		$png_header = array(137, 80, 78, 71, 13, 10, 26, 10);
+		$f = fopen($filename, 'r');
+		for ($i = 0; $i < 8; $i++) {
+			$byte = ord(fread($f, 1));
+			if ($byte !== $png_header[$i]) {
+				fclose($f);
+				return false;
+			}
+		}
+		fclose($f);
+		return true;
+	}
+	
+	/*
+		function: png2jpg
+		converts a png image to a jpg image
+	*/
+	function png2jpg($originalFile, $outputFile, $quality) {
+		$image = imagecreatefrompng($originalFile);
+		imagejpeg($image, $outputFile, $quality);
+		imagedestroy($image);
+	}
 	
 }
 $reddit = new Reddit;
