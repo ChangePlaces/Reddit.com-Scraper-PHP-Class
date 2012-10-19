@@ -46,7 +46,12 @@ class Reddit {
 			$img = $savedir.'/'.$username.'/'.$this->cleanFileName($imgname);
 			// save the image locally
 			if(file_put_contents($img,file_get_contents($url))) {
-				return true;
+				if(file_put_contents($img,file_get_contents($url))) {
+					if($this->isFilePNG($img)) {
+						$this->png2jpg($img,str_replace('.jpg','.jpeg',$img),100);
+					}
+					return true;
+				}
 			}
 			return false;
 		} elseif(strstr($url,'imgur.com/a')) {
@@ -59,6 +64,9 @@ class Reddit {
 				$img = $savedir.'/'.$username.'/'.$this->cleanFileName($imgname);
 				// save the image locally
 				if(file_put_contents($img,file_get_contents($url))) {
+					if($this->isFilePNG($img)) {
+						$this->png2jpg($img,str_replace('.jpg','.jpeg',$img),100);
+					}
 					return true;
 				}
 			}			
