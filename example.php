@@ -1,7 +1,7 @@
 <?php
 // reddit/imgur scraper
 $section = 'gonewild';
-$max_pages = 5;
+$max_pages = 50;
 
 require_once("reddit.class.php");
 
@@ -20,6 +20,11 @@ foreach($data as $item) {
 	if(strstr($item['url'],'imgur.com')) {
 		$reddit->processImgurLink($item['url'],'images/',$item['author']);	
 	}
-	echo round(($counter/$totalitems)*100)."% completed...\n";
+	
+	// display progress
+	$completed = round(($counter/$totalitems)*100);
+	echo ($completed<>$last_completion) ? $completed."% complete\n" : '';
+	$last_completion = $completed;	
 	$counter++;
+	
 }
